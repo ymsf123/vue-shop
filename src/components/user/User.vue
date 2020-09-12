@@ -70,7 +70,12 @@
                 placement="top"
                 :enterable="false"
               >
-                <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+                <el-button
+                  @click="allotRoles(scope.row)"
+                  type="warning"
+                  icon="el-icon-setting"
+                  size="mini"
+                ></el-button>
               </el-tooltip>
             </template>
           </el-table-column>
@@ -146,6 +151,34 @@
         <el-button type="primary" @click="editUserInfo()">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 分配角色对话框 -->
+    <el-dialog
+      @close="clearSelectedInfo"
+      title="分配角色"
+      :visible.sync="allotRolesdialogVisible"
+      width="50%"
+    >
+      <div>
+        <p class="margintb">当前的用户：{{roleUserInfo.username}}</p>
+        <p class="margintb">当前的角色：{{roleUserInfo.role_name}}</p>
+        <p class="margintb">
+          分配新角色：
+          <el-select v-model="selectedRoleId" placeholder="请选择">
+            <el-option
+              v-for="item in rolelist"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="allotRolesdialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="savaUserRole">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -177,12 +210,20 @@ export default {
       },
       // 用户列表
       userlist: [],
+      // 分配角色显示
+      allotRolesdialogVisible: false,
+      // 当前被分配角色的用户信息
+      roleUserInfo: [],
+      // 角色列表
+      rolelist: [],
       // 总共用户个数
       totalpage: 0,
       // 添加用户表单是否显示
       dialogVisible: false,
       // 编辑用户表单是否显示
       editdialogVisible: false,
+      // 被选中的表单项
+      selectedRoleId: '',
       // 添加用户数据表单
       addUserForm: {
         username: '',
@@ -281,9 +322,7 @@ export default {
     editUser: async function (id) {
       this.editdialogVisible = true
       const { data: res } = await this.$http.get('users/' + id)
-      console.log(res)
       this.editUserForm = res.data
-      console.log(this.editUserForm)
     },
     closeEditForm: function () {
       this.$refs.editUserruleRef.resetFields()
@@ -324,6 +363,36 @@ export default {
       if (res.meta.status !== 200) return this.$message.error('删除失败')
       this.$message.success('删除成功')
       this.getuserInfo()
+    },
+    // 获取用户角色列表
+    async allotRoles(role) {
+      this.roleUserInfo = role
+      // 展示对话框之前，获取角色列表
+      const { data: res } = await this.$http.get('roles')
+      if (res.meta.status !== 200) {
+        return this.$message.error('角色列表获取失败')
+      }
+      this.rolelist = res.data
+      this.allotRolesdialogVisible = true
+    },
+    // 分配用户角色
+    async savaUserRole() {
+      if (!this.selectedRoleId) return this.$message.error('请选择分配的角色')
+      const { data: res } = await this.$http.put(
+        `users/${this.roleUserInfo.id}/role`,
+        {
+          rid: this.selectedRoleId
+        }
+      )
+      if (res.meta.status !== 200) return this.$message.error('分配角色失败')
+      this.$message.success('分配角色成功')
+      this.selectedRoleId = ''
+      this.getuserInfo()
+      this.allotRolesdialogVisible = false
+    },
+    // 监听分配角色对话框关闭
+    clearSelectedInfo() {
+      this.selectedRoleId = ''
     }
   },
   created() {
@@ -333,4 +402,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.margintb {
+  margin: 30px 0;
+}
 </style>

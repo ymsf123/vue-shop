@@ -7,8 +7,8 @@
       </div>
       <el-button type="info" @click="loginout">退出登录</el-button>
     </el-header>
-    <!-- 侧边栏 -->
     <el-container>
+      <!-- 侧边栏 -->
       <el-aside :width="isCollapse ? '64px':'200px'">
         <el-menu
           background-color="#313743"
