@@ -6,6 +6,9 @@ import './plugins/element.js'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/global.css'
+import TableTree from 'vue-table-with-tree-grid'
+
+Vue.component('tree-table', TableTree)
 Vue.use(ElementUI)
 Vue.prototype.$http = axios
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
