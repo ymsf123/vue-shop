@@ -271,7 +271,6 @@ export default {
     },
     // 获取删除信息
     async deleteCate(id) {
-      console.log(id)
       const result = await this.$confirm(
         '此操作将永久删除该分类, 是否继续?',
         '提示',
@@ -281,10 +280,8 @@ export default {
           type: 'warning'
         }
       ).catch((err) => err)
-      console.log(result)
       if (result !== 'confirm') return this.$message.info('已取消删除')
       const { data: res } = await this.$http.delete('categories/' + id)
-      console.log(res)
       if (res.meta.status !== 200) this.$message.error('删除失败')
       this.$message.success('删除成功')
       this.getCateInfo()
